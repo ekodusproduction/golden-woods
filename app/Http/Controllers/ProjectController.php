@@ -7,41 +7,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use \Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Storage;
 class ProjectController extends Controller
 {
-/**
-     * @OA\Post(
-     *      path="/projects",
-     *      operationId="getProjectsList",
-     *      tags={"Projects"},
-     *      summary="Get list of projects",
-     *      description="Returns list of projects",
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/ProjectResource")
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
-     *     )
-     */
-
     public function create(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), Project::createRules());
-    
             if ($validator->fails()) {
                 return response()->json(["message" => "Oops!" . $validator->errors()->first(), "status" => 400]);
             }
-    
-            // Check if 'projectName' is present in the request.
             if (!$request->has('projectName')) {
                 return response()->json(["message" => "Oops! 'projectName' is required.", "status" => 400]);
             }
@@ -51,9 +26,10 @@ class ProjectController extends Controller
                 'status' => $request->status,
                 'location' => $request->location,
             ];
-           
+            
             $projectData["projectImage"] = $request->projectImage->store('public/image');
-            $projectData["projectVideo"] = $request->projectVideo->store('public/video');
+            $path = Storage::putFile('photos', new File($request->projectVideo));
+            $projectData["projectVideo"] = $path;
             $projectData["approvedPlan"] = $request->approvedPlan->store('public/plans');
             $projectData["brochure"] = $request->brochure->store('public/brochures');
             $projectData["projectNoc"] = $request->projectNoc->store('public/nocs');
@@ -62,7 +38,6 @@ class ProjectController extends Controller
             return response()->json(["message" => "Project created successfully", "status" => 201]);
         } catch (QueryException $e) {
             if ($e->errorInfo[1] == 1062) {
-                // Handle duplicate entry error (error code 1062) for 'projects_projectname_unique'.
                 return response()->json(["message" => "Project name already exists.", "status" => 400]);
             } else {
                 return response()->json(["message" => 'Oops! Something Went Wrong.' . $e->getMessage(), "status" => 500]);
@@ -74,39 +49,14 @@ class ProjectController extends Controller
     {  
         try{
         $project = Project::find($request->id);
-        // Handle the case where the project was not found
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
-        // Return the project
             return response()->json(["data"=>$project, "status"=>200]);
         }catch (\Exception $e) {
             return response()->json(["message" => 'Oops! Something Went Wrong.' . $e->getMessage(), "status" => 500]);
         }
     }
-
-    /**
-     * @OA\Get(
-     *      path="/projects",
-     *      operationId="getProjectsList",
-     *      tags={"Projects"},
-     *      summary="Get list of projects",
-     *      description="Returns list of projects",
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *          @OA\JsonContent(ref="#/components/schemas/ProjectResource")
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
-     *     )
-     */
 
     public function getList(Request $request)
     {try{
@@ -117,7 +67,6 @@ class ProjectController extends Controller
         }
     }
 
-   
     public function edit(Request $request)
     {
         try {
@@ -162,7 +111,6 @@ class ProjectController extends Controller
         }
     }
     
-
     public function destroy(Request $request)
     {
         try{

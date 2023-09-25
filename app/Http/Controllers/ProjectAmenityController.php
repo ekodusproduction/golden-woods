@@ -11,23 +11,6 @@ use Illuminate\Http\Request;
 
 class ProjectAmenityController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    // public function index(Reqeust $request)
-    // {
-    //     //
-    //     $amenities = ProjectAmenity::all();
-    //     return response()->json(["data"=> $amenities, "status"=>200]);
-    // }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create(Request $request)
     {      
         $project = Project::find($request->projectId);
@@ -43,20 +26,6 @@ class ProjectAmenityController extends Controller
         return response()->json(["message"=> "Amenity added to project.","status"=>201]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StoreProjectAmenityRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\ProjectAmenity  $projectAmenity
-     * @return \Illuminate\Http\Response
-     */
     public function show(Request $request)
     {
         $project = ProjectAmenity::find($request->id); 
@@ -65,36 +34,10 @@ class ProjectAmenityController extends Controller
         }
         return response()->json(["data"=>$project, "status"=>200]);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\ProjectAmenity  $projectAmenity
-     * @return \Illuminate\Http\Response
-     */
-
-    
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateProjectAmenityRequest  $request
-     * @param  \App\Models\ProjectAmenity  $projectAmenity
-     * @return \Illuminate\Http\Response
-     */
  
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\ProjectAmenity  $projectAmenity
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Request $request)
     {
         $amenityId = $request->input('id');
-
-        // Find and delete rows with matching projectId.
         $deletedRows = ProjectAmenity::where('amenityId', $amenityId)->delete();
     
         if ($deletedRows > 0) {
