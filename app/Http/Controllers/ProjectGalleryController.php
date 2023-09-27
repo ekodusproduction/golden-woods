@@ -8,31 +8,38 @@ use App\Models\Amenity;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
 class ProjectGalleryController extends Controller
 {
+
     public function create(Request $request)
     {   
- 
-        ProjectGallery::where("projectId",$request->id)->delete();
-        if($request->hasFile('gallery')){
-            $uploadedFiles = $request->file('gallery');
+        $galleries = ProjectGallery::where("projectId", $request->id);
+        if(!empty($galleries)){
+            Storage::delete($galleries->image);
+        }
+        ProjectGallery::where("projectId", $request->id)->delete();
+        $uploadedFiles = $request->allFiles();
+        if (!empty($uploadedFiles)) {
             foreach ($uploadedFiles as $file) {
-       
-                $data = $file->store('');
-                ProjectGallery::create(["projectId"=>$request->id, "galleryId"=>$data]);
+                $data = $file->store('public/gallery');
+                ProjectGallery::create(["projectId" => $request->id, "image" => $data]);
             }
             return response()->json(['message' => 'Files uploaded successfully']);
         }
+        
         return response()->json(['message' => 'No files provided.']);
     }
+    
 
-    public function getById(Request $request)
+    public function index(Request $request)
     {
-        $projectGallery = ProjectGallery::where("projectId",$request->id)->get();
+        $projectGalleries = ProjectGallery::where("projectId",$request->id)->get();
         if ($projectGalleries->isEmpty()) {
             return response()->json(["message" => "No galleries found for the specified projectId.", "status" => 404]);
         }
-        return response()->json(["data"=> $projectGallery, "status"=>200]);
+        return response()->json(["data"=> $projectGalleries, "status"=>200]);
     }
 
 }

@@ -28,8 +28,7 @@ class ProjectController extends Controller
             ];
             
             $projectData["projectImage"] = $request->projectImage->store('public/image');
-            $path = Storage::putFile('photos', new File($request->projectVideo));
-            $projectData["projectVideo"] = $path;
+            $projectData["projectVideo"] = $request->approvedPlan->store('public/video');;
             $projectData["approvedPlan"] = $request->approvedPlan->store('public/plans');
             $projectData["brochure"] = $request->brochure->store('public/brochures');
             $projectData["projectNoc"] = $request->projectNoc->store('public/nocs');
@@ -59,11 +58,12 @@ class ProjectController extends Controller
     }
 
     public function getList(Request $request)
-    {try{
-        $list = Project::select('id', "projectName")->get();
-        return response()->json(["data"=>$list, "status"=>200]);
-    } catch (\Exception $e) {
-        return response()->json(["message" => 'Oops! Something Went Wrong.' . $e->getMessage(), "status" => 500]);
+    {
+        try{
+            $list = Project::select('id', "projectName")->get();
+            return response()->json(["data"=>$list, "status"=>200]);
+        }catch (\Exception $e) {
+            return response()->json(["message" => 'Oops! Something Went Wrong.' . $e->getMessage(), "status" => 500]);
         }
     }
 

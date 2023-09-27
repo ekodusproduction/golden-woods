@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Models\User;
-use App\Mail\MyEmail;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordEmail;
+use App\Models\User;
 use App\Models\ResetPassword;
+
+
 class UserController extends Controller
 {
 
@@ -62,7 +65,7 @@ class UserController extends Controller
         }
     }
 
-    public function sendPasswordResetMail(Request $request)
+    public function forgotPassword(Request $request)
     {
         try {     
             if(!$request->email){
@@ -70,13 +73,25 @@ class UserController extends Controller
             }
             $email = $request->email;
 
-            $emailFound = User::where('email', $email)->get();
+            $emailFound = User::where('email', $email)->first();
             if(!$emailFound){
                 return response()->json(['message'=>'Email not registered', 'status'=>404]);
             }
             $token = Str::random(60);
-             // Issue a Sanctum token
-
+            $oldToken = ResetPassword::where('email', $email)->first();
+            if(!$oldToken){
+                ResetPassword::create([
+                    'email'=>$email,
+                    'token'=>$token,
+                    'expires_at'=>now()->addMinutes(15),
+                ]);
+            }else{
+                $oldToken->token = $token;
+                $oldToken->expires_at = now()->addMinutes(15);
+                $oldToken->save();
+            }
+            $passwordResetLink = env('Login_Url') . $token;
+            Mail::to(users:$email)->send(new ResetPasswordEmail($passwordResetLink));
             return response()->json(['token' => $token, 'message' => 'Login successful', 'status' => 200]);
 
         }catch (\Exception $e) {

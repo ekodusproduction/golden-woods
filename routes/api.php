@@ -23,7 +23,7 @@ use App\Http\Controllers\ProjectGalleryController;
 
     Route::post('signup', [UserController::class, 'signup']);
     Route::post('login', [UserController::class, 'login'])->name('login');
-    // Route::get('login', [UserController::class, 'login'])->name('login');
+    Route::post('forgotpassword', [UserController::class, 'forgotPassword'])->name('forgotPassword');
 
 
     Route::group(["middleware"=>'auth:sanctum'],function () {
@@ -61,11 +61,9 @@ use App\Http\Controllers\ProjectGalleryController;
             Route::delete('{id}/delete', [ProjectAmenityController::class, 'destroy']);
         });        
         Route::prefix('gallery')->group(function () {
-            Route::post('create', [ProjectGalleryController::class, 'create']);
-            Route::get('{id}/get', [ProjectGalleryController::class, 'show']);
-            Route::get('list', [ProjectGalleryController::class, 'index']);
-            Route::put('{id}/update', [ProjectGalleryController::class, 'update']);
-            Route::delete('{id}/delete', [ProjectGalleryController::class, 'destroy']);
+            Route::post('{id}/create', [ProjectGalleryController::class, 'create']);
+            Route::get('{id}/get', [ProjectGalleryController::class, 'index']);
+
         });        
         Route::prefix('blog')->group(function () {
             Route::post('create', [BlogController::class, 'create']);
